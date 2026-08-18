@@ -23,15 +23,14 @@ DROP TABLE IF EXISTS `bookings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `bookings` (
-  `BookingID` int NOT NULL,
+  `BookingID` int NOT NULL AUTO_INCREMENT,
   `TableNo` int NOT NULL,
   `BookingDate` date NOT NULL,
-  `CustomerID` int NOT NULL,
-  `BookingSlot` time NOT NULL,
+  `CustomerID` int DEFAULT NULL,
   PRIMARY KEY (`BookingID`),
   KEY `CustomerID_idx` (`CustomerID`),
   CONSTRAINT `CustomerID` FOREIGN KEY (`CustomerID`) REFERENCES `customers` (`CustomerID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,7 +39,7 @@ CREATE TABLE `bookings` (
 
 LOCK TABLES `bookings` WRITE;
 /*!40000 ALTER TABLE `bookings` DISABLE KEYS */;
-INSERT INTO `bookings` VALUES (1,5,'2026-08-20',1,'18:30:00'),(2,3,'2026-08-20',2,'19:00:00'),(3,8,'2026-08-21',3,'20:00:00'),(4,2,'2026-08-22',4,'17:45:00'),(5,6,'2026-08-23',5,'18:00:00'),(6,7,'2026-08-23',6,'19:15:00'),(7,4,'2026-08-24',7,'20:30:00'),(8,1,'2026-08-24',8,'17:30:00');
+INSERT INTO `bookings` VALUES (2,3,'2026-08-20',2),(3,8,'2026-08-21',3),(4,2,'2026-08-22',4),(5,6,'2026-08-23',5),(6,7,'2026-08-23',6),(7,4,'2026-08-24',7),(8,1,'2026-08-24',8),(9,1,'2026-08-20',NULL),(10,1,'2026-08-21',NULL),(11,4,'2026-10-20',3);
 /*!40000 ALTER TABLE `bookings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -230,6 +229,72 @@ UNLOCK TABLES;
 --
 -- Dumping routines for database 'littlelemondb'
 --
+/*!50003 DROP PROCEDURE IF EXISTS `AddBooking` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`admin1`@`%` PROCEDURE `AddBooking`(b_id int, c_id int, booking_date date, table_number int)
+insert into Bookings (BookingID, CustomerID, BookingDate, TableNo) 
+values (b_id, c_id, booking_date, table_number) ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `AddValidBooking` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`admin1`@`%` PROCEDURE `AddValidBooking`(booking_date date,table_number int)
+begin
+
+start transaction;
+
+if exists(select BookingID from Bookings where BookingDate=booking_date and TableNo=table_number) 
+then 
+select 'Booking Failed: Booking slot occupied' as BookingStatus;
+rollback;
+else 
+insert into Bookings (BookingDate, TableNo) values (booking_date, table_number);
+select 'Booking Successful' as BookingStatus; 
+commit;
+end if;
+
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `CancelBooking` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`admin1`@`%` PROCEDURE `CancelBooking`(id int)
+delete from Bookings where BookingID=id ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `CancelOrder` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -250,6 +315,30 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `CheckBooking` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`admin1`@`%` PROCEDURE `CheckBooking`(booking_date date, table_number int)
+select
+case
+	when exists(select BookingID from Bookings
+    where BookingDate=booking_date and TableNo=table_number) 
+    then concat('Table ', table_number, ' is already booked')
+    
+    else concat('Table ', table_number, ' is not booked')
+end as 'Booking Status' ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `GetMaxQuantity` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -262,6 +351,23 @@ DELIMITER ;
 DELIMITER ;;
 CREATE DEFINER=`admin1`@`%` PROCEDURE `GetMaxQuantity`()
 select max(Quantity) as MaxQuantity from Orders ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `UpdateBooking` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`admin1`@`%` PROCEDURE `UpdateBooking`(id int, booking_date date)
+update Bookings set BookingDate=booking_date where BookingID=id ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -295,4 +401,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-08-18 14:37:00
+-- Dump completed on 2026-08-18 17:21:46
